@@ -62,8 +62,8 @@ func TestLimiter_Check(t *testing.T) {
 				RedisClient: tt.fields.RedisClient,
 				SWOpt:       swOpt,
 			}
-			if got := l.Check(); got != tt.want {
-				t.Errorf("Check() = %v, want %v", got, tt.want)
+			if got := l.CheckLimited(); got != tt.want {
+				t.Errorf("CheckLimited() = %v, want %v", got, tt.want)
 			}
 		})
 	}

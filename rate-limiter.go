@@ -10,13 +10,15 @@ import (
 //go:embed rate_limiter.lua
 var rateLimiterScript string
 
+// SlideWindowOpt is the option of slide window
 type SlideWindowOpt struct {
-	WindowTime int64
-	Threshold  int64
-	Key        string
+	WindowTime int64  // ms
+	Threshold  int64  // times
+	Key        string // key
 	UniqueId   string // unique id
 }
 
+// NewSlideWindowOpt 创建一个滑动窗口限流配置
 func NewSlideWindowOpt(windowTime, threshold int64, opts ...Option) *SlideWindowOpt {
 	swOpt := &SlideWindowOpt{
 		WindowTime: windowTime,
@@ -30,23 +32,27 @@ func NewSlideWindowOpt(windowTime, threshold int64, opts ...Option) *SlideWindow
 
 type Option func(*SlideWindowOpt)
 
+// WithUniqueId 设置唯一标识
 func WithUniqueId(uniqueId string) Option {
 	return func(swOpt *SlideWindowOpt) {
 		swOpt.UniqueId = uniqueId
 	}
 }
 
+// WithKey 设置key
 func WithKey(key string) Option {
 	return func(swOpt *SlideWindowOpt) {
 		swOpt.Key = key
 	}
 }
 
+// Limiter is the rate limiter
 type Limiter struct {
 	SWOpt       *SlideWindowOpt
 	RedisClient *redis.Client
 }
 
+// NewLimiter 创建一个限流器
 func NewLimiter(swOpt *SlideWindowOpt, redisClient *redis.Client) *Limiter {
 	return &Limiter{
 		SWOpt:       swOpt,
@@ -54,7 +60,8 @@ func NewLimiter(swOpt *SlideWindowOpt, redisClient *redis.Client) *Limiter {
 	}
 }
 
-func (l *Limiter) Check() bool {
+// CheckLimited 检查是否限流, false: 限流, true: 不限流
+func (l *Limiter) CheckLimited() bool {
 	res := l.RedisClient.Eval(
 		context.Background(),
 		rateLimiterScript,
